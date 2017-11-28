@@ -69,12 +69,14 @@ int main(int arg, char * argv[]){
 
 	 //Test 5. Continues to read and write correctly after one of the disks fails
 	 image_fail ( disk_1 );
-	 memset(test_write, 'F', block_num * BLOCK_SIZE);
+	 char test_write_2 [block_num * BLOCK_SIZE];
+	 char test_read_2 [block_num * BLOCK_SIZE];
+	 memset(test_write_2, 'F', block_num * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, block_num, test_write)==SUCCESS);
-	assert(mirror->ops->read(mirror, 0, block_num, test_read)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, block_num, test_write_2)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_2)==SUCCESS);
 	//compare read and write values
-	assert ( strncmp( test_write, test_read, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_2, test_read_2, block_num * BLOCK_SIZE ) == 0 );
 
 	//Test 6. Continues to read and write (correctly returning data written before the failure) after the disk is replaced.
 	// create a new image and check if vaild, and if size is same as the failed disk_1
