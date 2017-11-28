@@ -13,4 +13,4 @@ dd if=/dev/zero bs=512 count=10 | tr '\0' '2' > mirror_disk2.img
 
 dd if=/dev/zero bs=512 count=10 | tr '\0' 'R' > mirror_new_disk.img
 
-./mirror-test mirror_disk1.img mirror_disk2.img
+./mirror-test /mirror_disk1.img /mirror_disk2.img
