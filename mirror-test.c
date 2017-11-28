@@ -78,14 +78,17 @@ int main(int arg, char * argv[]){
 
 	 //Test 5. Continues to read and write correctly after one of the disks fails
 	 image_fail(disk_1);
-	 printf("failing disk 1\n");
 
 	 char test_write_5 [block_num * BLOCK_SIZE];
 	 char test_read_5 [block_num * BLOCK_SIZE];
 	 memset(test_write_5, 'F', block_num * BLOCK_SIZE);
 
 	assert(mirror->ops->write(mirror, 0, block_num, test_write_5)==SUCCESS);
+
+	printf("Test 5 write\n");
 	assert(mirror->ops->read(mirror, 0, block_num, test_read_5)==SUCCESS);
+	printf("Test 5 read\n");
+
 	//compare read and write values
 	assert ( strncmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
 
