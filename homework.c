@@ -46,7 +46,8 @@ static int mirror_read(struct blkdev * dev, int first_blk,
     if (first_blk<0 || first_blk+num_blks>mdev->nblks)
         return E_BADADDR;
     
-    for (int i = 0;i <2; i++){
+    int i;
+    for (i = 0;i <2; i++){
         struct blkdev *disk = mdev->disks[i];
         if (disk != NULL){
             // read from disk. val should return SUCCESS or E_UNAVAIL

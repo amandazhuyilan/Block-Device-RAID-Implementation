@@ -2,7 +2,7 @@
 
 # Compile mirror-test.c
 
-gcc -g -Wall -o mirror-test mirror-test.c image.c homework.c
+gcc -g -w -o mirror-test mirror-test.c image.c homework.c
 
 # Amanda: Create 5120-byte file containing different characters for disk images.
 
