@@ -62,6 +62,8 @@ static int mirror_read(struct blkdev * dev, int first_blk,
                 return val;
                 
             }
+        else if (disk == NULL)
+            continue;
         }
     //Amanda: If none of the disks are working, return E_UNAVAIL
     return E_UNAVAIL;
