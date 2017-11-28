@@ -29,59 +29,63 @@ int main(int arg, char * argv[]){
 	// read and write with block_num = 2
 	// test_write and test_read will be reused frequently in the following tests
 	int block_num = 2;
-	char test_read [block_num * BLOCK_SIZE];
-	char test_write [block_num * BLOCK_SIZE];
+	char test_read_2 [block_num * BLOCK_SIZE];
+	char test_write_2 [block_num * BLOCK_SIZE];
 
 	// setting the first block_num * BLOCK_SIZE of test_write into char 'A'
-	memset(test_write, 'A', block_num * BLOCK_SIZE);
+	memset(test_write_2, 'A', block_num * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, block_num, test_write)==SUCCESS);
-	assert(mirror->ops->read(mirror, 0, block_num, test_read)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, block_num, test_write_2)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_2)==SUCCESS);
 	//compare read and write values
-	assert ( strncmp( test_write, test_read, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_2, test_read_2, block_num * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 1 & 2: creating a mirror and return correct length.\n");
 
 	//Test 3. Can handle reads and writes of different sizes, and return the same data as written
 	// read and write with different sizes block_num = 4
 	int block_num_1 = 4;
-	char test_read_1 [block_num_1 * BLOCK_SIZE];
-	char test_write_1 [block_num_1 * BLOCK_SIZE];
+	char test_read_3 [block_num_1 * BLOCK_SIZE];
+	char test_write_3 [block_num_1 * BLOCK_SIZE];
 
 	// setting the first block_num * BLOCK_SIZE of test_write into char 'A'
-	memset(test_write, 'B', block_num_1 * BLOCK_SIZE);
+	memset(test_write_3, 'B', block_num_1 * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, block_num_1, test_write_1)==SUCCESS);
-	assert(mirror->ops->read(mirror, 0, block_num_1, test_read_1)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, block_num_1, test_write_3)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, block_num_1, test_read_3)==SUCCESS);
 	//compare read and write values
-	assert ( strncmp( test_write_1, test_read_1, block_num_1 * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_3, test_read_3, block_num_1 * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 3:  Can handle reads and writes of different sizes, and return the same data as written.\n");
 
 	//Test 4. reads data from the proper location in the images, and doesnt overwrite incorrect locations on write.
 	// reading and writing to incorrect address (LBA<0 or first_blk+num_blks>mdev->nblks)
-	 assert ( mirror -> ops -> read ( mirror, -2, block_num, test_read )
+	char test_read_4 [block_num * BLOCK_SIZE];
+	char test_write_4 [block_num * BLOCK_SIZE];
+
+	 assert ( mirror -> ops -> read ( mirror, -2, block_num, test_read_4 )
          == E_BADADDR );
-	 assert ( mirror -> ops -> read ( mirror, 2, 20, test_read )
+	 assert ( mirror -> ops -> read ( mirror, 2, 20, test_read_4 )
          == E_BADADDR );
 
-	 assert ( mirror -> ops -> write ( mirror, -2, block_num, test_write )
+	 assert ( mirror -> ops -> write ( mirror, -2, block_num, test_write_4 )
              == E_BADADDR );
- 	 assert ( mirror -> ops -> write ( mirror, 2, 20, test_read )
+ 	 assert ( mirror -> ops -> write ( mirror, 2, 20, test_read_4 )
      == E_BADADDR );
 
      printf("Completed Test 4: reads data from the proper location in the images, and doesnt overwrite incorrect locations on write.");
 
 	 //Test 5. Continues to read and write correctly after one of the disks fails
 	 image_fail ( disk_1 );
-	 char test_write_2 [block_num * BLOCK_SIZE];
-	 char test_read_2 [block_num * BLOCK_SIZE];
-	 memset(test_write_2, 'F', block_num * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, block_num, test_write_2)==SUCCESS);
-	assert(mirror->ops->read(mirror, 0, block_num, test_read_2)==SUCCESS);
+	 char test_write_5 [block_num * BLOCK_SIZE];
+	 char test_read_5 [block_num * BLOCK_SIZE];
+	 memset(test_write_5, 'F', block_num * BLOCK_SIZE);
+
+	assert(mirror->ops->write(mirror, 0, block_num, test_write_5)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_5)==SUCCESS);
 	//compare read and write values
-	assert ( strncmp( test_write_2, test_read_2, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 5: Continues to read and write correctly after one of the disks fails\n");
 
@@ -93,24 +97,27 @@ int main(int arg, char * argv[]){
 
 	// Check if contents are copied to new_disk
 	assert ( mirror_replace ( mirror, 0, new_disk ) == SUCCESS );
-	assert(mirror->ops->read(mirror, 0, block_num, test_read) == SUCCESS);
+	 char test_read_6 [block_num * BLOCK_SIZE];
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_6) == SUCCESS);
 
 	printf("Completed Test 6: Continues to read and write (correctly returning data written before the failure) after the disk is replaced.\n");
 
 	// Test 7. Reads and writes (returning data written before first failure) after the other disk fails
 
 	image_fail(disk_2);
-	memset(test_write, 'Y', block_num * BLOCK_SIZE);
+	char test_write_7 [block_num * BLOCK_SIZE];
+	char test_read_7 [block_num * BLOCK_SIZE];
+	memset(test_write_7, 'Y', block_num * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, block_num, test_write)==SUCCESS);
-	assert(mirror->ops->read(mirror, 0, block_num, test_read)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, block_num, test_write_7)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_7)==SUCCESS);
 	//compare read and write values
-	assert ( strncmp( test_write, test_read, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_7, test_read_7, block_num * BLOCK_SIZE ) == 0 );
 
 	//Fail new_disk, read and write should be E_UNAVAIL
 	image_fail(new_disk);
-	assert(mirror->ops->write(mirror, 0, block_num, test_write)==E_UNAVAIL);
-	assert(mirror->ops->read(mirror, 0, block_num, test_read)==E_UNAVAIL);
+	assert(mirror->ops->write(mirror, 0, block_num, test_write_7)==E_UNAVAIL);
+	assert(mirror->ops->read(mirror, 0, block_num, test_read_7)==E_UNAVAIL);
 
 	printf("Completed Test 7: CReads and writes (returning data written before first failure) after the other disk fails.\n");
 
