@@ -65,22 +65,16 @@ int main(int arg, char * argv[]){
 
 	 assert ( mirror -> ops -> read ( mirror, -2, block_num, test_read_4 )
          == E_BADADDR );
-	 printf("test 4 read 1\n");
+
 	 assert ( mirror -> ops -> read ( mirror, 2, 20, test_read_4 )
          == E_BADADDR );
-	 printf("test 4 read 2\n");
 
 	 assert ( mirror -> ops -> write ( mirror, -2, block_num, test_write_4 )
              == E_BADADDR );
-	 printf("test 4 write 1\n");
-
  	 assert ( mirror -> ops -> write ( mirror, 2, 20, test_read_4 )
      == E_BADADDR );
 
-     printf("test 4 read 2\n");
-
-
-     printf("Completed Test 4: reads data from the proper location in the images, and doesnt overwrite incorrect locations on write.");
+     printf("Completed Test 4: reads data from the proper location in the images, and doesnt overwrite incorrect locations on write.\n");
 
 	 //Test 5. Continues to read and write correctly after one of the disks fails
 	 image_fail ( disk_1 );
