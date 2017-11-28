@@ -51,7 +51,7 @@ static int mirror_read(struct blkdev * dev, int first_blk,
     for (i = 0; i<2; i++){
         struct blkdev *disk = mdev->disks[i];
         if (disk == NULL){
-            // if disk fails, close on the corresponding blkdev 
+            // if disk fails, close on the corresponding blkdev below
             disk_content[i] = E_UNAVAIL;
             continue;
         }
@@ -60,7 +60,7 @@ static int mirror_read(struct blkdev * dev, int first_blk,
 
             if (disk_content[i] == E_UNAVAIL){
                 disk->ops->close(disk);
-                disk = NULL;
+                mdev->disks[i] = NULL;
             }
         }
 
