@@ -54,19 +54,21 @@ static int mirror_read(struct blkdev * dev, int first_blk,
         }
         else{
             // read from disk. val should return SUCCESS or E_UNAVAIL
-            int val = disk->ops->read(mdev->disks[i],first_blk,num_blks,buf);
-            if (val == E_UNAVAIL){
+            int val = disk->ops->read(disk,first_blk,num_blks,buf);
+            if (val == SUCCESS)
+                return SUCCESS;
+
+            else if (val == E_UNAVAIL){
                 disk->ops->close(disk);
                 mdev->disks[i] = NULL;   // Amanda: must use mdev->disks[i] instead of disk because disk is already closed!!
                 continue;
             }
 
-            else if (val == SUCCESS)
-                return val;
         }
     //Amanda: If none of the disks are working, return E_UNAVAIL
-    return E_UNAVAIL;
     }
+    return E_UNAVAIL;
+
 }
 
 
