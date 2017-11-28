@@ -47,28 +47,29 @@ static int mirror_read(struct blkdev * dev, int first_blk,
         return E_BADADDR;
     
     int i;
-    for (i = 0;i <2; i++){
+    int disk_content[2];
+    for (i = 0; i<2; i++){
         struct blkdev *disk = mdev->disks[i];
         if (disk == NULL){
+            // if disk fails, close on the corresponding blkdev 
+            disk_content[i] = E_UNAVAIL;
             continue;
         }
         else{
-            // read from disk. val should return SUCCESS or E_UNAVAIL
-            int val = disk->ops->read(disk,first_blk,num_blks,buf);
-            if (val == SUCCESS)
-                return SUCCESS;
+            disk_content[i] = disk -> ops -> read ( disk, first_blk,num_blks, buf );
 
-            else if (val == E_UNAVAIL){
+            if (disk_content[i] == E_UNAVAIL){
                 disk->ops->close(disk);
-                mdev->disks[i] = NULL;   // Amanda: must use mdev->disks[i] instead of disk because disk is already closed!!
-                continue;
+                disk = NULL;
             }
-
         }
-    //Amanda: If none of the disks are working, return E_UNAVAIL
-    }
-    return E_UNAVAIL;
 
+        if (disk_content[0] == SUCCESS || disk_content[1]==SUCCESS){
+            return SUCCESS;
+        } 
+        else
+            return E_UNAVAIL;
+    }
 }
 
 
