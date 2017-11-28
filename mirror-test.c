@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "blkdev.h"
+#include "homework.c"
 
 // Requirements for mirror tests:
 // 1. Creates a volume properly
