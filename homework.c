@@ -93,7 +93,6 @@ static int mirror_write(struct blkdev * dev, int first_blk,
         if (disk == NULL){
             // if disk fails, close on the corresponding blkdev 
             disk_content[i] = E_UNAVAIL;
-            disk->ops->close(disk);
             continue;
         }
         else{
