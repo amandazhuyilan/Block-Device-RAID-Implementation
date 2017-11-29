@@ -12,7 +12,7 @@
 // 6. Continues to read and write (correctly returning data written before the failure) after the disk is replaced.
 // 7. Reads and writes (returning data written before first failure) after the other disk fails
 
-int main(int arg, char * argv[]){
+int main(int argc, char ** argv){
 	// Amanda: create blkdevs for disks images using functions from image.c
 	struct blkdev *disk_1 = image_create(argv[1]);
 	struct blkdev *disk_2 = image_create(argv[2]);
@@ -108,7 +108,6 @@ int main(int arg, char * argv[]){
 	// Test 7. Reads and writes (returning data written before first failure) after the other disk fails
 
 	image_fail(disk_1);
-	printf("failed disk 1");
 	char test_write_7 [block_num * BLOCK_SIZE];
 	char test_read_7 [block_num * BLOCK_SIZE];
 	memset(test_write_7, 'Y', block_num * BLOCK_SIZE);
