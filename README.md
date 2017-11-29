@@ -1,11 +1,11 @@
-### Homework 2 Block Devices
+### RAID Implementation in Block Devices
 
-In this assignment, we are implenting RAID0(mirroring), RAID1(Stripping) and RAID4 in a block device layer.
+In this project, we are implenting RAID 1(mirroring), RAID 0(Stripping) and RAID4 in a block device layer.
 
 #### Some basic provided stuff
 - In the  ```blkdev.h``` header file, ```blkdev``` is structured with a pointer ```*ops```that points to the basic operations of a block device, while the ```private``` points to the block device itself. Therefore whenever we are initalizing a new block device, we reference it as (passing on ```blkdev *dev``` as input) ```struct new_device *new_dev = dev->private```.
 
-#### Mirroring (RAID 0):
+#### Mirroring (RAID 1):
 
 ```mirror_num_blocks(struct blkdev *dev)``` returns the number of blocks in of the mirrored device.
 
@@ -21,9 +21,21 @@ First checks if ```first_blk + num_blks``` exceeds the size of the mirror device
  ```mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)``` returns ```E_SIZE`` if the size of ```newdisk``` is not as the same size of ```volume```. The non-failing disk need to be replicate using ```read``` to working disk and ```write``` to ```newdisk```. Will return SUCCESS upen coping failed disk to ```newdisk```.
  
  
- #### Test Cases for Mirroring
+ #### Test Cases for RAID 1:
  
- 
+1. Creates a volume properly.
+
+2. Returns the correct length.
+
+3. Can handle reads and writes of different sizes, and return the same data as written.
+
+4. Reads data from the proper location in the images, and doesnt overwrite incorrect locations. on write.
+
+5. Continues to read and write correctly after one of the disks fails.
+
+6. Continues to read and write (correctly returning data written before the failure) after the disk is replaced.
+
+7. Reads and writes (returning data written before first failure) after the other disk fails.
  
  #### Striping (RAID 0):
  ```struct raid0_dev``` is a custom struct for raid0 devices similar to block dev.
