@@ -99,15 +99,16 @@ int main(int arg, char * argv[]){
 	assert(new_disk->ops->num_blocks(new_disk) == disk_1->ops->num_blocks(disk_1));
 
 	// Check if contents are copied to new_disk
-	assert ( mirror_replace ( mirror, 0, new_disk ) == E_UNAVAIL );
+	assert ( mirror_replace ( mirror, 1, new_disk ) == SUCCESS );
 	char test_read_6 [block_num * BLOCK_SIZE];
-	assert(mirror->ops->read(mirror, 0, block_num, test_read_6) == SUCCESS);
+	assert(mirror->ops->read(mirror, 1, block_num, test_read_6) == SUCCESS);
 
 	printf("Completed Test 6: Continues to read and write (correctly returning data written before the failure) after the disk is replaced.\n");
 
 	// Test 7. Reads and writes (returning data written before first failure) after the other disk fails
 
 	image_fail(disk_1);
+	printf("failed disk 1");
 	char test_write_7 [block_num * BLOCK_SIZE];
 	char test_read_7 [block_num * BLOCK_SIZE];
 	memset(test_write_7, 'Y', block_num * BLOCK_SIZE);
