@@ -86,7 +86,7 @@ int main(int arg, char * argv[]){
 	assert(mirror->ops->write(mirror, 0, 2, test_write_5)==E_UNAVAIL);
 
 	printf("Test 5 write\n");
-	assert(mirror->ops->read(mirror, 0, 2, test_read_5)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, 2, test_read_5)==E_UNAVAIL);
 	printf("Test 5 read\n");
 
 	//compare read and write values
