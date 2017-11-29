@@ -83,7 +83,7 @@ int main(int arg, char * argv[]){
 	 char test_read_5 [3 * BLOCK_SIZE];
 	 memset(test_write_5, 'F', 3 * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 6, 3, test_write_5)==E_UNAVAIL);
+	assert(mirror->ops->write(mirror, 6, 3, test_write_5)==SUCCESS);
 
 	printf("Test 5 write\n");
 	assert(mirror->ops->read(mirror, 6, 3, test_read_5)==SUCCESS);
@@ -109,7 +109,7 @@ int main(int arg, char * argv[]){
 
 	// Test 7. Reads and writes (returning data written before first failure) after the other disk fails
 
-	image_fail(disk_2);
+	image_fail(disk_1);
 	char test_write_7 [block_num * BLOCK_SIZE];
 	char test_read_7 [block_num * BLOCK_SIZE];
 	memset(test_write_7, 'Y', block_num * BLOCK_SIZE);
