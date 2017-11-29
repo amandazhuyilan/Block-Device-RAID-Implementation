@@ -58,7 +58,7 @@ static int mirror_read(struct blkdev * dev, int first_blk,
             disk_content[i] = disk -> ops -> read ( disk, first_blk,num_blks, buf );
 
             if (disk_content[i] == E_UNAVAIL){
-                disk->ops->close(disk);
+                //disk->ops->close(disk);
                 mdev->disks[i] = NULL;
             }
         }
@@ -103,7 +103,7 @@ static int mirror_write(struct blkdev * dev, int first_blk,
             disk_content[i] = disk -> ops -> write ( disk, first_blk,num_blks, buf );
 
             if (disk_content[i] == E_UNAVAIL){
-                disk->ops->close(disk);
+                //disk->ops->close(disk);
                 disk = NULL;
             }
         }
@@ -213,7 +213,7 @@ int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
     }
 
     // Replace failed disk with new disk 
-    mdev->disks[i] = newhdisk;
+    mdev->disks[i] = newdisk;
     return SUCCESS;
 
 }
