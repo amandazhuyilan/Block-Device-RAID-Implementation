@@ -114,8 +114,7 @@ int main(int argc, char ** argv){
 
 	assert(mirror->ops->write(mirror, 0, block_num, test_write_7)==SUCCESS);
 	assert(mirror->ops->read(mirror, 0, block_num, test_read_7)==SUCCESS);
-	//compare read and write values
-	assert ( strncmp( test_write_7, test_read_7, block_num * BLOCK_SIZE ) == 0 );
+
 
 	//Fail new_disk, read and write should be E_UNAVAIL
 	image_fail(new_disk);
