@@ -83,7 +83,7 @@ int main(int arg, char * argv[]){
 	 char test_read_5 [2 * BLOCK_SIZE];
 	 memset(test_write_5, 'F', 2 * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 0, 2, test_write_5)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, 2, test_write_5)==E_UNAVAIL);
 
 	printf("Test 5 write\n");
 	assert(mirror->ops->read(mirror, 0, 2, test_read_5)==SUCCESS);
