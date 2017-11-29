@@ -88,7 +88,7 @@ int main(int arg, char * argv[]){
 	assert(mirror->ops->read(mirror, 0, block_num, test_read_5)==SUCCESS);
 
 	//compare read and write values
-	assert ( strncmp( test_write_5, test_read_5, 3 * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 5: Continues to read and write correctly after one of the disks fails\n");
 
