@@ -213,7 +213,7 @@ int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
     }
 
     // Replace failed disk with new disk 
-    newdisk = working_disk;
+    mdev->disks[i] = newdisk;
     return SUCCESS;
 
 }
