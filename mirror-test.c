@@ -78,6 +78,8 @@ int main(int arg, char * argv[]){
 
 	 //Test 5. Continues to read and write correctly after one of the disks fails
 	 image_fail(disk_1);
+	 if (disk_1 == NULL)
+	 	printf("disk 1 failed\n");
 
 	 char test_write_5 [3 * BLOCK_SIZE];
 	 char test_read_5 [3 * BLOCK_SIZE];
