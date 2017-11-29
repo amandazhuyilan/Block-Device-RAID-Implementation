@@ -83,14 +83,14 @@ int main(int arg, char * argv[]){
 	 char test_read_5 [3 * BLOCK_SIZE];
 	 memset(test_write_5, 'F', 3 * BLOCK_SIZE);
 
-	assert(mirror->ops->write(mirror, 6, 3, test_write_5)==SUCCESS);
+	assert(mirror->ops->write(mirror, 0, 3, test_write_5)==SUCCESS);
 
 	printf("Test 5 write\n");
-	assert(mirror->ops->read(mirror, 6, 3, test_read_5)==SUCCESS);
+	assert(mirror->ops->read(mirror, 0, 3, test_read_5)==SUCCESS);
 	printf("Test 5 read\n");
 
 	//compare read and write values
-	assert ( strncmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_5, test_read_5, 3 * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 5: Continues to read and write correctly after one of the disks fails\n");
 
