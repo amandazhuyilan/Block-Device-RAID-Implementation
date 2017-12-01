@@ -39,6 +39,7 @@ int main(int argc, char **argv)
     for (i = 0; i < 16; i++) {
         result = RAID_0->ops->write(RAID_0, i*num_disks*stripe_size,
                                      num_disks*stripe_size, buf);
+        printf("%d\n",result);
         assert(result == SUCCESS);
     }
 
