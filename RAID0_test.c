@@ -39,7 +39,7 @@ int main(int argc, char **argv)
     for (i = 2, ndisks = 0; i < argc; i++)
         disks[ndisks++] = image_create(argv[i]);
 
-    struct blkdev *striped = striped_create(ndisks, disks, stripesize);
+    struct blkdev *striped = RAID0_create(ndisks, disks, stripesize);
     assert(striped != NULL);
 
     int nblks = disks[0]->ops->num_blocks(disks[0]);
