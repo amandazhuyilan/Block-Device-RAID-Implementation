@@ -16,18 +16,20 @@ int main(int argc, char **argv)
 {
 
     struct blkdev *disks[5];
-    int i, ndisks;
-    int stripesize = atoi(argv[1]);
+    int i, num_disks;				//ndisks = argc = the total number of input +1
+    int stripe_size = atoi(argv[1]);
 
-    printf("i = %d, ndisks = %d, stripeszie = %d,", i, ndisks, stripesize);
+    printf("argc = %d", argc);
 
-    for (i = 2, ndisks = 0; i < argc; i++)
-        disks[ndisks++] = image_create(argv[i]);
+    for (i = 2, num_disks = 0; i < argc; i++)
+        disks[num_disks++] = image_create(argv[i]);
 
     /* and creates a striped volume with the specified stripe size
      */
-    struct blkdev *striped = raid0_create(ndisks, disks, stripesize);
-    assert(striped != NULL);
+    struct blkdev *RAID_0 = raid0_create(num_disks, disks, stripe_size);
+    assert(RAID_0 != NULL);
+
+    printf("RAID0 test completed successfullt!\n");
 
     /* your tests here */
 
