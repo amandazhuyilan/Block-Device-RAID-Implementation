@@ -16,7 +16,8 @@ int main(int argc, char **argv)
 {
 
     struct blkdev *disks[5];
-    int i, ndisks, stripesize = atoi(argv[1]);
+    int i, ndisks;
+    int stripesize = atoi(argv[1]);
 
     printf("i = %d, ndisks = %d, stripeszie = %d,", i, ndisks, stripesize);
 
