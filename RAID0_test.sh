@@ -10,12 +10,10 @@ dd if=/dev/zero bs=512 count=10 | tr '\0' '4' > RAID0_disk4.img
 
 dd if=/dev/zero bs=512 count=10 | tr '\0' '5' > RAID0_disk5.img
 
-all_disks = "RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img"
+./RAID0-test 2 all_disks RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img
 
-./RAID0-test 2 all_disks
+./RAID0-test 4 all_disks RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img
 
-./RAID0-test 4 all_disks
+./RAID0-test 7 all_disks RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img
 
-./RAID0-test 7 all_disks
-
-./RAID0-test 32 all_disks
+./RAID0-test 32 all_disks RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img
