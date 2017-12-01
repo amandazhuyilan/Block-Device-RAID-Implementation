@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 #include "blkdev.h"
 
 /********** MIRRORING ***************/
@@ -22,8 +23,7 @@ struct mirror_dev {
 };
 
 // Amanda: Return the number of blocks nblks
-static int mirror_num_blocks(struct blkdev *dev)
-{
+static int mirror_num_blocks(struct blkdev *dev) {
     /* your code here */
     struct mirror_dev *mdev = dev->private;
     return mdev->nblks;
@@ -35,40 +35,39 @@ static int mirror_num_blocks(struct blkdev *dev)
  * Note that a read operation may return an error to indicate that the
  * underlying device has failed, in which case you should close the
  * device and flag it (e.g. as a null pointer) so you won't try to use
- * it again. 
+ * it again.
  */
 static int mirror_read(struct blkdev * dev, int first_blk,
-                       int num_blks, void *buf)
-{
+                       int num_blks, void *buf) {
     struct mirror_dev *mdev = dev->private;
 
     //Amanda: check for bad address errors
-    if (first_blk<0 || first_blk+num_blks>mdev->nblks)
+    if (first_blk < 0 || first_blk + num_blks > mdev->nblks)
         return E_BADADDR;
-    
+
     int i;
     int disk_content[2];
-    for (i = 0; i<2; i++){
+    for (i = 0; i < 2; i++) {
         struct blkdev *disk = mdev->disks[i];
-        if (disk == NULL){
+        if (disk == NULL) {
             disk_content[i] = E_UNAVAIL;
             continue;
-        }
-        else{
-            disk_content[i] = disk -> ops -> read ( disk, first_blk,num_blks, buf );
+        } else {
+            disk_content[i] = disk -> ops -> read ( disk, first_blk, num_blks, buf );
 
-            if (disk_content[i] == E_UNAVAIL){
+            if (disk_content[i] == E_UNAVAIL) {
                 //disk->ops->close(disk);
                 mdev->disks[i] = NULL;
             }
         }
 
-        if (disk_content[0] == SUCCESS || disk_content[1]==SUCCESS){
+        if (disk_content[0] == SUCCESS || disk_content[1] == SUCCESS) {
             return SUCCESS;
-        } 
-        else
+        } else
             return E_UNAVAIL;
     }
+
+    return SUCCESS;
 }
 
 
@@ -79,54 +78,52 @@ static int mirror_read(struct blkdev * dev, int first_blk,
  * (e.g. as a null pointer) so you won't try to use it again.
  */
 static int mirror_write(struct blkdev * dev, int first_blk,
-                        int num_blks, void *buf)
-{
+                        int num_blks, void *buf) {
     /* your code here */
     struct mirror_dev *mdev = dev->private;
 
     //Amanda: check for bad address errors
-    if (first_blk<0 || first_blk+num_blks>mdev->nblks)
+    if (first_blk < 0 || first_blk + num_blks > mdev->nblks)
         return E_BADADDR;
 
     int i;
     int disk_content[2];
     //Amanda: disk_content holds the contents read by the read function or E_UNAVAIL if the disk fails
 
-    for (i = 0; i<2; i++){
+    for (i = 0; i < 2; i++) {
         struct blkdev *disk = mdev->disks[i];
-        if (disk == NULL){
-            // if disk fails, close on the corresponding blkdev 
+        if (disk == NULL) {
+            // if disk fails, close on the corresponding blkdev
             disk_content[i] = E_UNAVAIL;
             continue;
-        }
-        else{
-            disk_content[i] = disk -> ops -> write ( disk, first_blk,num_blks, buf );
+        } else {
+            disk_content[i] = disk -> ops -> write ( disk, first_blk, num_blks, buf );
 
-            if (disk_content[i] == E_UNAVAIL){
+            if (disk_content[i] == E_UNAVAIL) {
                 //disk->ops->close(disk);
                 disk = NULL;
             }
         }
 
-        if (disk_content[0] == SUCCESS || disk_content[1]==SUCCESS){
+        if (disk_content[0] == SUCCESS || disk_content[1] == SUCCESS) {
             return SUCCESS;
-        } 
-        else
+        } else
             return E_UNAVAIL;
     }
+
+    return SUCCESS;
 }
 
 /* clean up, including: close any open (i.e. non-failed) devices, and
  * free any data structures you allocated in mirror_create.
  */
-static void mirror_close(struct blkdev *dev)
-{
+static void mirror_close(struct blkdev *dev) {
     /* your code here */
     struct mirror_dev *mdev = dev->private;
 
     //Amanda: closing non-failed devices
     int i;
-    for (i = 0; i<2; i++){
+    for (i = 0; i < 2; i++) {
         struct blkdev *disk = mdev->disks[i];
         if (disk != NULL)
             disk->ops->close(disk);
@@ -147,10 +144,9 @@ struct blkdev_ops mirror_ops = {
 
 /* create a mirrored volume from two disks. Do not write to the disks
  * in this function - you should assume that they contain identical
- * contents. 
+ * contents.
  */
-struct blkdev *mirror_create(struct blkdev *disks[2])
-{
+struct blkdev *mirror_create(struct blkdev *disks[2]) {
     struct blkdev *dev = malloc(sizeof(*dev));
     struct mirror_dev *mdev = malloc(sizeof(*mdev));
 
@@ -159,16 +155,16 @@ struct blkdev *mirror_create(struct blkdev *disks[2])
     assert(dev != NULL || mdev != NULL);
 
     //Amanda: if the size of the two disks are not of the same size, print an error and return NULL
-    if (disks[0]->ops->num_blocks(disks[0]) != disks[1]->ops->num_blocks(disks[1])){
+    if (disks[0]->ops->num_blocks(disks[0]) != disks[1]->ops->num_blocks(disks[1])) {
         printf("Error: The two disk sizes are not the same.\n");
         return NULL;
     }
 
     // Amanda: copying two disks to the correspoding disks in mdev
-     mdev->disks[0] = disks[0];
-     mdev->disks[1] = disks[1];
-     // Amanda: also copying the number of blocks to mirror dev (assuming size of both disks are the same)
-     mdev->nblks = disks[0]->ops->num_blocks(disks[0]);
+    mdev->disks[0] = disks[0];
+    mdev->disks[1] = disks[1];
+    // Amanda: also copying the number of blocks to mirror dev (assuming size of both disks are the same)
+    mdev->nblks = disks[0]->ops->num_blocks(disks[0]);
 
     dev->private = mdev;
     dev->ops = &mirror_ops;
@@ -181,8 +177,7 @@ struct blkdev *mirror_create(struct blkdev *disks[2])
  * replicate content from the other underlying device before returning
  * from this call.
  */
-int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
-{
+int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk) {
     struct mirror_dev *mdev = volume->private;
 
     if (newdisk->ops->num_blocks(newdisk) != mdev->nblks)
@@ -192,10 +187,9 @@ int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
     // Amanda: If failed disk is disks[0] set working disk as disks[1], vice versa
     struct blkdev *working_disk = mdev -> disks[1];
 
-    if (i == 1){
+    if (i == 1) {
         working_disk = mdev -> disks[0];
-    }
-    else if (i == 0){
+    } else if (i == 0) {
         working_disk = mdev -> disks[1];
     }
 
@@ -212,16 +206,15 @@ int mirror_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
         }
     }
 
-    // Replace failed disk with new disk 
+    // Replace failed disk with new disk
     mdev->disks[i] = newdisk;
     return SUCCESS;
-
 }
 
 /**********  RAID0 ***************/
 
 /* Custom struct for raid0 devices similar to
- * block dev and image dev 
+ * block dev and image dev
  */
 struct raid0_dev {
     struct blkdev **disks;
@@ -242,7 +235,7 @@ static int raid0_read_write(struct blkdev * dev, int first_blk,
     struct raid0_dev *r0dev = dev->private;
 
     //check for bad address errors
-    if (first_blk < 0 || first_blk + num_blks > r0dev->ops->num_blocks(r0dev))
+    if (first_blk < 0 || first_blk + num_blks > dev->ops->num_blocks(dev))
         return E_BADADDR;
 
     int unitSize = r0dev->unitSize;
@@ -255,7 +248,7 @@ static int raid0_read_write(struct blkdev * dev, int first_blk,
         int diskNum = (first_blk % stripeSize) / unitSize ;
 
         int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
-        struct raid0_dev *diskToUse = r0dev->disks[diskNum];
+        struct blkdev *diskToUse = r0dev->disks[diskNum];
         int returnValue;
         if (isWrite)
             returnValue = diskToUse->ops->write(diskToUse, blockInDisk, len, buf);
@@ -279,11 +272,11 @@ static int raid0_read_write(struct blkdev * dev, int first_blk,
  * Note that a read operation may return an error to indicate that the
  * underlying device has failed, in which case you should (a) close the
  * device and (b) return an error on this and all subsequent read or
- * write operations. 
+ * write operations.
  */
 static int raid0_read(struct blkdev * dev, int first_blk,
                       int num_blks, void *buf) {
-    return raid0_read_write(dev, first_blk, num_blks, *buf, 0);
+    return raid0_read_write(dev, first_blk, num_blks, buf, 0);
 }
 
 /* write blocks to a striped volume.
@@ -292,11 +285,11 @@ static int raid0_read(struct blkdev * dev, int first_blk,
  */
 static int raid0_write(struct blkdev * dev, int first_blk,
                        int num_blks, void *buf) {
-    return raid0_read_write(dev, first_blk, num_blks, *buf, 1);
+    return raid0_read_write(dev, first_blk, num_blks, buf, 1);
 }
 
 /* clean up, including: close all devices and free any data structures
- * you allocated in stripe_create. 
+ * you allocated in stripe_create.
  */
 static void raid0_close(struct blkdev *dev) {
     struct raid0_dev *r0dev = dev->private;
@@ -311,15 +304,15 @@ static void raid0_close(struct blkdev *dev) {
 
 
 /* Overriding the basic operations of a block device for raid0 */
- struct blkdev_ops raid0_ops = {
-     .num_blocks = raid0_num_blocks,
-     .read = raid0_read,
-     .write = raid0_write,
-     .close = raid0_close
- };
+struct blkdev_ops raid0_ops = {
+    .num_blocks = raid0_num_blocks,
+    .read = raid0_read,
+    .write = raid0_write,
+    .close = raid0_close
+};
 
 
-/* helper function - checks if the given disks are of same size 
+/* helper function - checks if the given disks are of same size
  * returns 1 on success, -1 otherwise.
  */
 int checkDisksSameSize(int N, struct blkdev *disks[]) {
@@ -343,10 +336,10 @@ int checkDisksSameSize(int N, struct blkdev *disks[]) {
  * 4..7 on disks[1], etc.)
  * Check the size of the disks to compute the final volume size, and
  * fail (return NULL) if they aren't all the same.
- * Do not write to the disks in this function. 
+ * Do not write to the disks in this function.
  */
 struct blkdev *raid0_create(int N, struct blkdev *disks[], int unit) {
-    if(checkDisksSameSize(N,disks) == -1)
+    if (checkDisksSameSize(N, disks) == -1)
         return NULL;
 
     int num_blocks = disks[0]->ops->num_blocks(disks[0]);
@@ -370,7 +363,7 @@ struct blkdev *raid0_create(int N, struct blkdev *disks[], int unit) {
 /**********   RAID 4  ***************/
 
 /* Custom struct for raid4 devices similar to
- * block dev and image dev 
+ * block dev and image dev
  */
 struct raid4_dev {
     struct blkdev **disks;
@@ -390,7 +383,7 @@ int raid4_num_blocks(struct blkdev *dev) {
 /* helper function - compute parity function across two blocks of
  * 'len' bytes and put it in a third block. Note that 'dst' can be the
  * same as either 'src1' or 'src2', so to compute parity across N
- * blocks you can do: 
+ * blocks you can do:
  *
  *     void **block[i] - array of pointers to blocks
  *     dst = <zeros[len]>
@@ -399,8 +392,7 @@ int raid4_num_blocks(struct blkdev *dev) {
  *
  * Yes, it could be faster. Don't worry about it.
  */
-void parity(int len, void *src1, void *src2, void *dst)
-{
+void parity(int len, void *src1, void *src2, void *dst) {
     unsigned char *s1 = src1, *s2 = src2, *d = dst;
     int i;
     for (i = 0; i < len; i++)
@@ -409,7 +401,7 @@ void parity(int len, void *src1, void *src2, void *dst)
 
 
 // INVARIENT: dev->private->failedDiskNumber != -1
-void recoverFailedDiskData(struct blkdev *dev, int blockInDisk, int len, void *outputBuf){
+void recoverFailedDiskData(struct blkdev *dev, int blockInDisk, int len, void *outputBuf) {
     struct raid4_dev *r4dev = dev->private;
     int failedDiskNumber = r4dev->failedDiskNumber;
 
@@ -418,10 +410,10 @@ void recoverFailedDiskData(struct blkdev *dev, int blockInDisk, int len, void *o
     char tempBuf[len * BLOCK_SIZE];
     int i;
     for (i = 0; i < r4dev->dataDisksCount + 1; i++) {
-        if(i != failedDiskNumber){
+        if (i != failedDiskNumber) {
             struct blkdev *disk = r4dev->disks[i];
-            result = disk->ops->read(disk, blockInDisk, len, tempBuf);
-            parity(count * BLOCK_SIZE, tempBuf, outputBuf, outputBuf);
+            disk->ops->read(disk, blockInDisk, len, tempBuf);
+            parity(len * BLOCK_SIZE, tempBuf, outputBuf, outputBuf);
         }
     }
 }
@@ -429,13 +421,13 @@ void recoverFailedDiskData(struct blkdev *dev, int blockInDisk, int len, void *o
 /* Sets computed parity into parityBuf
  * Returns the disk num if it fails while computing parity.
  */
-int computeParity(struct blkdev *dev, int blockInDisk, int len, void *dataForFailedDisk, void *parityBuf){
+int computeParity(struct blkdev *dev, int blockInDisk, int len, void *dataForFailedDisk, void *parityBuf) {
     struct raid4_dev *r4dev = dev->private;
     int parityDiskNum = r4dev->dataDisksCount;
     int failedDiskNumber = r4dev->failedDiskNumber;
-    
+
     // if parity disk is degraded
-    if(r4dev->isDegraded && (r4dev->failedDiskNumber == parityDiskNum)){
+    if (r4dev->isDegraded && (r4dev->failedDiskNumber == parityDiskNum))
         return parityDiskNum;
 
     // dst = <zeros[len]>
@@ -443,15 +435,14 @@ int computeParity(struct blkdev *dev, int blockInDisk, int len, void *dataForFai
     char tempBuf[len * BLOCK_SIZE];
     int i;
     for (i = 0; i < r4dev->dataDisksCount; i++) {
-        if(failedDiskNumber == i){
-            if(dataForFailedDisk != NULL)
+        if (failedDiskNumber == i) {
+            if (dataForFailedDisk != NULL)
                 memcpy(tempBuf, dataForFailedDisk, len * BLOCK_SIZE);
             else
                 recoverFailedDiskData(dev, blockInDisk, len, tempBuf);
-        }
-        else{
+        } else {
             struct blkdev *disk = r4dev->disks[i];
-            result = disk->ops->read(disk, blockInDisk, len, tempBuf);
+            int result = disk->ops->read(disk, blockInDisk, len, tempBuf);
             if (result == E_UNAVAIL)
                 return i;
         }
@@ -473,11 +464,11 @@ static int raid4_read(struct blkdev * dev, int first_blk,
     struct raid4_dev *r4dev = dev->private;
 
     //check for bad address errors
-    if (first_blk < 0 || first_blk + num_blks > r4dev->ops->num_blocks(r4dev))
+    if (first_blk < 0 || first_blk + num_blks > dev->ops->num_blocks(dev))
         return E_BADADDR;
 
     int unitSize = r4dev->unitSize;
-    int disksCount = r4dev->disksCount;
+    int disksCount = r4dev->dataDisksCount;
     int stripeSize = unitSize * disksCount;
     int i;
     for (i = num_blks; i > 0;) {
@@ -486,22 +477,22 @@ static int raid4_read(struct blkdev * dev, int first_blk,
         int diskNum = (first_blk % stripeSize) / unitSize ;
 
         int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
-        struct raid0_dev *diskToUse = r4dev->disks[diskNum];
+        struct blkdev *diskToUse = r4dev->disks[diskNum];
         int returnValue;
 
-        if(diskToUse != NULL)
+        if (diskToUse != NULL)
             returnValue = diskToUse->ops->read(diskToUse, blockInDisk, len, buf);
         else returnValue = E_UNAVAIL;
 
         if (returnValue == E_UNAVAIL) {
             // first, close the disk
-            if(diskToUse != NULL)
-                diskToUse->ops->close(diskToUse);   
-            
-            // if the raid4 device is already degraded          
-            if(r4dev->isDegraded){
+            if (diskToUse != NULL)
+                diskToUse->ops->close(diskToUse);
+
+            // if the raid4 device is already degraded
+            if (r4dev->isDegraded) {
                 // and if the known failed disk is not this disk, return E_UNAVAIL
-                if(r4dev->failedDiskNumber != diskNum)
+                if (r4dev->failedDiskNumber != diskNum)
                     return E_UNAVAIL;
             } else {
                 // marking the raid4 device as degraded
@@ -532,43 +523,43 @@ static int raid4_read(struct blkdev * dev, int first_blk,
  * In the degraded state perform all writes to non-failed drives, and
  * forget about the failed one. (parity will handle it)
  */
-static int raid4_write(struct blkdev *dev, int first_blk,
-                       int num_blks, void *buf){
+static int raid4_write(struct blkdev * dev, int first_blk,
+                       int num_blks, void *buf) {
     struct raid4_dev *r4dev = dev->private;
     struct blkdev *parityDisk = r4dev->parityDisk;
 
     //check for bad address errors
-    if (first_blk < 0 || first_blk + num_blks > r4dev->ops->num_blocks(r4dev))
+    if (first_blk < 0 || first_blk + num_blks > dev->ops->num_blocks(dev))
         return E_BADADDR;
 
     int unitSize = r4dev->unitSize;
     int disksCount = r4dev->dataDisksCount;
-    int stripeSize = unitSize * dataDisksCount;
+    int stripeSize = unitSize * disksCount;
     int i;
     for (i = num_blks; i > 0;) {
-        int blockInDisk = (first_blk % unitSize) + stripeSetNum * unitSize;
+        int blockInDisk = (first_blk % unitSize) + (first_blk / stripeSize) * unitSize;
         int blocksRemaining = unitSize - (blockInDisk % unitSize);
         int diskNum = (first_blk % stripeSize) / unitSize;
 
         int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
-        struct raid4_dev *diskToUse = r4dev->disks[diskNum];
-        int returnValue;   
+        struct blkdev *diskToUse = r4dev->disks[diskNum];
+        int returnValue;
 
-        if(diskToUse != NULL)
+        if (diskToUse != NULL)
             returnValue = diskToUse->ops->write(diskToUse, blockInDisk, len, buf);
         else returnValue = E_UNAVAIL;
 
         // checking for data disks failures
         // returning E_UNAVAIL if more than 1 disk fails
-        if(returnValue == E_UNAVAIL) {
+        if (returnValue == E_UNAVAIL) {
             // first, closing the disk
-            if(diskToUse != NULL)
-                diskToUse->ops->close(diskToUse);  
+            if (diskToUse != NULL)
+                diskToUse->ops->close(diskToUse);
 
-            // if the raid4 device is already degraded          
-            if(r4dev->isDegraded){
+            // if the raid4 device is already degraded
+            if (r4dev->isDegraded) {
                 // and if the known failed disk is not this disk, return E_UNAVAIL
-                if(r4dev->failedDiskNumber != diskNum)
+                if (r4dev->failedDiskNumber != diskNum)
                     return E_UNAVAIL;
             } else {
                 // marking the raid4 device as degraded
@@ -580,14 +571,14 @@ static int raid4_write(struct blkdev *dev, int first_blk,
                 returnValue = computeParity(dev, blockInDisk, len, buf, parityBuf);
 
                 // if disk failed while computing parity
-                if(returnValue == E_UNAVAIL)
+                if (returnValue == E_UNAVAIL)
                     return E_UNAVAIL;
-                
+
                 // write parity
                 returnValue = parityDisk->ops->write(parityDisk, blockInDisk, len, parityBuf);
 
                 // if parity disk failed
-                if(returnValue == E_UNAVAIL)
+                if (returnValue == E_UNAVAIL)
                     return E_UNAVAIL;
             }
         } else if (returnValue == SUCCESS) {
@@ -596,7 +587,7 @@ static int raid4_write(struct blkdev *dev, int first_blk,
             returnValue = computeParity(dev, blockInDisk, len, NULL, parityBuf);
 
             // if a disk fails while computing parity
-            if(returnValue != -1){
+            if (returnValue != -1) {
                 r4dev->isDegraded = 1;
                 r4dev->failedDiskNumber = returnValue;
             }
@@ -605,9 +596,9 @@ static int raid4_write(struct blkdev *dev, int first_blk,
             returnValue = parityDisk->ops->write(parityDisk, blockInDisk, len, parityBuf);
 
             // if parity disk fails
-            if(returnValue == E_UNAVAIL){
-                if(r4dev->isDegraded) return E_UNAVAIL;
-                else{
+            if (returnValue == E_UNAVAIL) {
+                if (r4dev->isDegraded) return E_UNAVAIL;
+                else {
                     r4dev->isDegraded = 1;
                     r4dev->failedDiskNumber = r4dev->dataDisksCount;
                 }
@@ -617,16 +608,15 @@ static int raid4_write(struct blkdev *dev, int first_blk,
             buf = buf + len * BLOCK_SIZE;
             i = i - len;
             first_blk = first_blk + len;
-        } 
+        }
     }
     return SUCCESS;
 }
 
 /* clean up, including: close all devices and free any data structures
- * you allocated in raid4_create. 
+ * you allocated in raid4_create.
  */
-static void raid4_close(struct blkdev *dev)
-{
+static void raid4_close(struct blkdev * dev) {
     struct raid4_dev *r4dev = dev->private;
     int i;
     for (i = 0; i < r4dev->dataDisksCount + 1; i++) {
@@ -638,12 +628,12 @@ static void raid4_close(struct blkdev *dev)
 }
 
 /* Overriding the basic operations of a block device for raid0 */
- struct blkdev_ops raid4_ops = {
-     .num_blocks = raid4_num_blocks,
-     .read = raid4_read,
-     .write = raid4_write,
-     .close = raid4_close
- };
+struct blkdev_ops raid4_ops = {
+    .num_blocks = raid4_num_blocks,
+    .read = raid4_read,
+    .write = raid4_write,
+    .close = raid4_close
+};
 
 
 /* Initialize a RAID 4 volume with strip size 'unit', using
@@ -652,9 +642,8 @@ static void raid4_close(struct blkdev *dev)
  * some of the grading scripts may fail if you modify data on the
  * drives in this function)
  */
-struct blkdev *raid4_create(int N, struct blkdev *disks[], int unit)
-{
-    if(checkDisksSameSize(N,disks) == -1)
+struct blkdev *raid4_create(int N, struct blkdev * disks[], int unit) {
+    if (checkDisksSameSize(N, disks) == -1)
         return NULL;
 
     int num_blocks = disks[0]->ops->num_blocks(disks[0]);
@@ -662,8 +651,8 @@ struct blkdev *raid4_create(int N, struct blkdev *disks[], int unit)
     struct raid4_dev *r4dev = malloc(sizeof(*r4dev));
 
     r4dev->disks = disks;
-    r4dev->parityDisk = disks[N-1];
-    r4dev->dataDisksCount = N-1;
+    r4dev->parityDisk = disks[N - 1];
+    r4dev->dataDisksCount = N - 1;
     r4dev->usableBlocksPerDisk = (num_blocks / unit) * unit;
     r4dev->unitSize = unit;
     r4dev->isDegraded = 0;
@@ -680,8 +669,7 @@ struct blkdev *raid4_create(int N, struct blkdev *disks[], int unit)
  * reconstruct content from data and parity before returning
  * from this call.
  */
-int raid4_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
-{
+int raid4_replace(struct blkdev *volume, int i, struct blkdev * newdisk) {
     struct raid4_dev *r4dev = volume->private;
     struct blkdev *diskToBeReplaced = r4dev->disks[i];
 
@@ -695,7 +683,7 @@ int raid4_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
     // Compute parity from other disks and store in new disk
     // irrespective of it being a data drive or a parity drive
     char recoveredDataBuf[r4DiskBlockCount * BLOCK_SIZE];
-    recoverFailedDiskData(dev, 0, r4DiskBlockCount, recoveredDataBuf);
+    recoverFailedDiskData(volume, 0, r4DiskBlockCount, recoveredDataBuf);
 
     // write computed data into the newdisk
     newdisk->ops->write(newdisk, 0, r4DiskBlockCount, recoveredDataBuf);
@@ -706,4 +694,3 @@ int raid4_replace(struct blkdev *volume, int i, struct blkdev *newdisk)
 
     return SUCCESS;
 }
-
