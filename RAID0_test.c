@@ -16,10 +16,12 @@ int main(int argc, char **argv)
 {
 
     struct blkdev *disks[5];
-    int i, num_disks;				//ndisks = argc = the total number of input +1
+    int i;
+    int num_disks = 0;				//ndisks = argc = the total number of input +1
     int stripe_size = atoi(argv[1]);
 
     printf("argc = %d", argc);
+    printf("stripe size = %d", argv[1]);
 
     for (i = 2, num_disks = 0; i < argc; i++)
         disks[num_disks++] = image_create(argv[i]);
