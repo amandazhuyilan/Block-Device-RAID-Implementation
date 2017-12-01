@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
     /* and creates a striped volume with the specified stripe size
      */
-    struct blkdev *striped = striped_create(ndisks, disks, stripesize);
+    struct blkdev *striped = raid0_create(ndisks, disks, stripesize);
     assert(striped != NULL);
 
     /* your tests here */
