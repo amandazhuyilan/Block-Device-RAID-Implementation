@@ -1,4 +1,4 @@
-gcc -g -w -o RAID0-test RAID0-test.c image.c homework.c -g
+gcc -g -w -o RAID0_test RAID0-test.c image.c homework.c -g
 
 dd if=/dev/zero bs=512 count=10 | tr '\0' '1' > RAID0_disk1.img
 
