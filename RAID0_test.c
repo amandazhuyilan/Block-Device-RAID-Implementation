@@ -84,11 +84,6 @@ int main(int argc, char **argv)
 
     printf("Passed test 4. Overwrites the correct location. \n");
 
-    image_fail(disks[0]);
-    assert(RAID_0 ->ops ->read(RAID_0, 0, 1, buf) == E_UNAVAIL);
-
-   	printf("Passed test 5. Fails a disk and verify that volume fails\n");
-
     char *big = malloc(5 * num_disks*chunk);
     for (i = 0; i < 5; i++)
         for (j = 0; j < num_disks; j++)
@@ -114,6 +109,10 @@ int main(int argc, char **argv)
 
    	printf("Passed test 6. Large (>1 stripe set), small, unaligned read and writes. \n");
 
+   	image_fail(disks[0]);
+    assert(RAID_0 ->ops ->read(RAID_0, 0, 1, buf) == E_UNAVAIL);
+
+   	printf("Passed test 5. Fails a disk and verify that volume fails\n");
    
     printf("Striping Test: SUCCESS\n");
     return 0;
