@@ -55,10 +55,12 @@ int main(int argc, char **argv)
     }
 
     for (i = 0; i < num_disks; i++) {
-        result = disks[i]->ops->read(disks[i], i*stripe_size,
+   		for (j = 0; j < 16; j++) {
+   			result = disks[i]->ops->read(disks[i], i*stripe_size,
                                      stripe_size, buf2);
         assert(result == SUCCESS);
         assert(memcmp(buf + i*chunk, buf2, chunk) == 0);
+    	}
     }
 
 
