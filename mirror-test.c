@@ -38,7 +38,7 @@ int main(int argc, char ** argv){
 	assert(mirror->ops->write(mirror, 0, block_num, test_write_2)==SUCCESS);
 	assert(mirror->ops->read(mirror, 0, block_num, test_read_2)==SUCCESS);
 	//compare read and write values
-	assert ( memcmp( test_write_2, test_read_2, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_2, test_read_2, block_num * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 1 & 2: creating a mirror and return correct length.\n");
 
@@ -54,7 +54,7 @@ int main(int argc, char ** argv){
 	assert(mirror->ops->write(mirror, 0, block_num_1, test_write_3)==SUCCESS);
 	assert(mirror->ops->read(mirror, 0, block_num_1, test_read_3)==SUCCESS);
 	//compare read and write values
-	assert ( memcmp( test_write_3, test_read_3, block_num_1 * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_3, test_read_3, block_num_1 * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 3:  Can handle reads and writes of different sizes, and return the same data as written.\n");
 
@@ -88,7 +88,7 @@ int main(int argc, char ** argv){
 	assert(mirror->ops->read(mirror, 0, block_num, test_read_5)==SUCCESS);
 
 	//compare read and write values
-	assert ( memcmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
+	assert ( strncmp( test_write_5, test_read_5, block_num * BLOCK_SIZE ) == 0 );
 
 	printf("Completed Test 5: Continues to read and write correctly after one of the disks fails\n");
 

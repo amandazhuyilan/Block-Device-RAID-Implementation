@@ -1,3 +1,5 @@
+Run shell files (.sh) to see testing results. 
+
 ### Homework 2 Block Devices
 
 In this assignment, we are implenting RAID 1(mirroring), RAID 0(Stripping) and RAID4 in a block device layer.
