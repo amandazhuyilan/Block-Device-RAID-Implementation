@@ -689,7 +689,7 @@ int raid4_replace(struct blkdev *volume, int i, struct blkdev * newdisk) {
     newdisk->ops->write(newdisk, 0, r4DiskBlockCount, recoveredDataBuf);
 
     // Closing the disk to be replaced
-    diskToBeReplaced->ops->close(diskToBeReplaced);
+    //diskToBeReplaced->ops->close(diskToBeReplaced);
     r4dev->disks[i] = newdisk;
 
     return SUCCESS;
