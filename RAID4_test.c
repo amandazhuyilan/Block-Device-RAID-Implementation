@@ -119,6 +119,7 @@ int main(int argc, char **argv)
    	image_fail(disks[0]);
 
     result = RAID_4->ops->read(RAID_4, offset, 5*(num_disks-1)*stripe_size, big2);
+    printf("read in RAID4 image fail\n");
     assert(result == SUCCESS);
     assert(memcmp(big, big2, 5*(num_disks-1)*chunk) == 0);
 
