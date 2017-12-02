@@ -25,3 +25,5 @@ echo "Testing with stripe size = 32 and disk num = 6"
 ./RAID0-test 32 RAID0_disk1.img RAID0_disk2.img RAID0_disk3.img RAID0_disk4.img RAID0_disk5.img RAID0_disk6.img
 
 echo "Passed test 1: Passes all other tests with different strip size (e.g 2,4,7 and 32 sectors) and different number of disks"
+
+echo "Passed all RAID 0 test!"
