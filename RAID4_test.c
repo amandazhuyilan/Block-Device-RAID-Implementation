@@ -36,5 +36,87 @@ int main(int argc, char **argv)
 
     printf("Passed test 2: Reports the correct size.\n");
 
+    int chunk = stripe_size * BLOCK_SIZE;
+    //char *buf = malloc(num_disks * chunk);
+    char *buf = calloc((num_disks) * chunk + 100, 1);
+
+    for (i = 0; i < num_disks; i++)
+        memset(buf + i * chunk, 'A'+i, chunk);
+
+    int result;
+    for (i = 0; i < 10; i++) {
+        result = RAID_4->ops->write(RAID_4, i*num_disks*stripe_size,
+                                     num_disks*stripe_size, buf);
+        assert(result == SUCCESS);
+    }
+
+    char *buf2 = malloc(num_disks * chunk);
+
+    for (i = 0; i < 10; i++) {
+        result = RAID_4->ops->read(RAID_4, i*num_disks*stripe_size,
+                                    num_disks*stripe_size, buf2);
+        assert(result == SUCCESS);
+        assert(memcmp(buf, buf2, num_disks * chunk) == 0);
+    }
+
+    int j;
+  	for (i = 0; i < num_disks; i++) {
+   		for (j = 0; j < 10; j++) {
+   			result = disks[i]->ops->read(disks[i], i*stripe_size,
+                                     stripe_size, buf2);
+        assert(result == SUCCESS);
+        assert(memcmp(buf + i*chunk, buf2, chunk) == 0);
+    	}
+    }
+
+    printf("Passed test 3: Writes and read back back data from the right disks and locations\n.");
+
+    for (i = 0; i < num_disks; i++)
+        memset(buf + i * chunk, 'a'+i, chunk);
+    
+    for (i = 0; i < 8; i++) {
+        for (j = 0; j < num_disks*stripe_size; j ++) {
+            result = RAID_4->ops->write(RAID_4, i*num_disks*stripe_size + j, 1,
+                                         buf + j*BLOCK_SIZE);
+            assert(result == SUCCESS);
+        }
+    }
+
+    for (i = 0; i < 8; i++) {
+        result = RAID_4->ops->read(RAID_4, i*num_disks*stripe_size,
+                                    num_disks*stripe_size, buf2);
+        assert(result == SUCCESS);
+        assert(memcmp(buf, buf2, num_disks * chunk) == 0);
+    }
+
+    printf("Passed small writes. \n");
+
+        char *big = malloc(5 * num_disks*chunk);
+    for (i = 0; i < 5; i++)
+        for (j = 0; j < num_disks; j++)
+            memset(big + j * chunk + i*num_disks*chunk, 'f'+i, chunk);
+
+    int offset = num_disks*stripe_size / 2;
+    result = RAID_4->ops->write(RAID_4, offset, 5*num_disks*stripe_size, big);
+    assert(result == SUCCESS);
+
+    char *big2 = malloc(5 * num_disks*chunk);
+    result = RAID_4->ops->read(RAID_4, offset, 5*num_disks*stripe_size, big2);
+    assert(result == SUCCESS);
+    assert(memcmp(big, big2, 5 * num_disks * chunk) == 0);
+
+
+    result = RAID_4->ops->read(RAID_4, 0, offset, buf2);
+    assert(result == SUCCESS);
+    assert(memcmp(buf, buf2, offset*BLOCK_SIZE) == 0);
+
+    result = RAID_4->ops->read(RAID_4, 5*num_disks*stripe_size + offset, offset, buf2);
+    assert(result == SUCCESS);
+    assert(memcmp(buf + offset*BLOCK_SIZE, buf2, offset*BLOCK_SIZE) == 0);
+
+   	printf("Passed test 6. Large (>1 stripe set), small, unaligned read and writes. \n");
+
+
+
 
 }
