@@ -116,10 +116,9 @@ int main(int argc, char **argv)
 
    	printf("Passed test 8. Large (>1 stripe set), small, unaligned read and writes. \n");
 
-   	image_fail(disks[0]);
+   	image_fail(disks[1]);
 
     result = RAID_4->ops->read(RAID_4, offset, 5*(num_disks-1)*stripe_size, big2);
-    printf("read in RAID4 image fail\n");
     assert(result == SUCCESS);
     assert(memcmp(big, big2, 5*(num_disks-1)*chunk) == 0);
 
@@ -155,7 +154,7 @@ int main(int argc, char **argv)
 	        }
 
 	        // create a new disk for replacement
-	        image_fail(disks[1]);
+	        image_fail(disks[2]);
 	        buf[0] = 'h';
 	        for (i = 0; i < 10; i++) {
 	            RAID_4->ops->write(RAID_4, i*(num_disks-1)*stripe_size,
