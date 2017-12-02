@@ -247,7 +247,7 @@ static int raid0_read_write(struct blkdev * dev, int first_blk,
         int blocksRemaining = unitSize - (blockInDisk % unitSize);
         int diskNum = (first_blk % stripeSize) / unitSize ;
 
-        int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
+        int len = (i <= blocksRemaining) ? i : blocksRemaining;
         struct blkdev *diskToUse = r0dev->disks[diskNum];
         int returnValue;
         if (isWrite)
@@ -476,7 +476,7 @@ static int raid4_read(struct blkdev * dev, int first_blk,
         int blocksRemaining = unitSize - (blockInDisk % unitSize);
         int diskNum = (first_blk % stripeSize) / unitSize ;
 
-        int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
+        int len = (i <= blocksRemaining) ? i : blocksRemaining;
         struct blkdev *diskToUse = r4dev->disks[diskNum];
         int returnValue;
 
@@ -541,7 +541,7 @@ static int raid4_write(struct blkdev * dev, int first_blk,
         int blocksRemaining = unitSize - (blockInDisk % unitSize);
         int diskNum = (first_blk % stripeSize) / unitSize;
 
-        int len = (num_blks <= blocksRemaining) ? num_blks : blocksRemaining;
+        int len = (i <= blocksRemaining) ? i : blocksRemaining;
         struct blkdev *diskToUse = r4dev->disks[diskNum];
         int returnValue;
 
