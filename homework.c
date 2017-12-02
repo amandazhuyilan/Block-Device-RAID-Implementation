@@ -486,8 +486,8 @@ static int raid4_read(struct blkdev * dev, int first_blk,
 
         if (returnValue == E_UNAVAIL) {
             // first, close the disk
-            if (diskToUse != NULL)
-                diskToUse->ops->close(diskToUse);
+            //if (diskToUse != NULL)
+            //    diskToUse->ops->close(diskToUse);
 
             // if the raid4 device is already degraded
             if (r4dev->isDegraded) {
@@ -553,8 +553,8 @@ static int raid4_write(struct blkdev * dev, int first_blk,
         // returning E_UNAVAIL if more than 1 disk fails
         if (returnValue == E_UNAVAIL) {
             // first, closing the disk
-            //if (diskToUse != NULL)
-            //    diskToUse->ops->close(diskToUse);
+            if (diskToUse != NULL)
+                diskToUse->ops->close(diskToUse);
 
             // if the raid4 device is already degraded
             if (r4dev->isDegraded) {
