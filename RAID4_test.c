@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     	num_disks++;	
     }
 
-    struct blkdev *RAID_4 = RAID0_create(num_disks, disks, stripe_size);
+    struct blkdev *RAID_4 = raid4_create(num_disks, disks, stripe_size);
     assert(RAID_4 != NULL);
 
     int nblks = disks[0]->ops->num_blocks(disks[0]);
