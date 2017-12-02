@@ -50,11 +50,11 @@ int main(int argc, char **argv)
         assert(result == SUCCESS);
     }
 
-    char *buf2 = malloc(num_disks * chunk);
+    char *buf2 = malloc((num_disks-1) * chunk);
 
     for (i = 0; i < 10; i++) {
-        result = RAID_4->ops->read(RAID_4, i*num_disks*stripe_size,
-                                    num_disks*stripe_size, buf2);
+        result = RAID_4->ops->read(RAID_4, i*(num_disks-1)*stripe_size,
+                                    (num_disks-1)*stripe_size, buf2);
         assert(result == SUCCESS);
         assert(memcmp(buf, buf2, (num_disks -1) * chunk) == 0);
     }
