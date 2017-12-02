@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     	num_disks++;	
     }
 
-    struct blkdev *RAID_4 = raid0_create(num_disks, disks, stripe_size);
+    struct blkdev *RAID_4 = RAID0_create(num_disks, disks, stripe_size);
     assert(RAID_4 != NULL);
 
     int nblks = disks[0]->ops->num_blocks(disks[0]);
@@ -114,7 +114,34 @@ int main(int argc, char **argv)
     assert(result == SUCCESS);
     assert(memcmp(buf + offset*BLOCK_SIZE, buf2, offset*BLOCK_SIZE) == 0);
 
-   	printf("Passed test 6. Large (>1 stripe set), small, unaligned read and writes. \n");
+   	printf("Passed test 8. Large (>1 stripe set), small, unaligned read and writes. \n");
+
+   	image_fail(disks[0]);
+
+        result = RAID_4->ops->read(RAID_4, offset, 5*num_disks*stripe_size, big2);
+        assert(result == SUCCESS);
+        assert(memcmp(big, big2, 5*num_disks*chunk) == 0);
+    
+        for (i = 0; i < num_disks; i++)
+            memset(buf + i * chunk, 'g'+i, chunk);
+
+        for (i = 0; i < 16; i++) {
+            result = RAID_4->ops->write(RAID_4, i*num_disks*stripe_size,
+                                      num_disks*stripe_size, buf);
+            assert(result == SUCCESS);
+        }
+
+        for (i = 0; i < 10; i++) {
+            memset(buf2, 0, num_disks*stripe_size*BLOCK_SIZE);
+            result = RAID_4->ops->read(RAID_4, i*num_disks*stripe_size,
+                                     num_disks*stripe_size, buf2);
+            assert(result == SUCCESS);
+            assert(memcmp(buf, buf2, num_disks * chunk) == 0);
+        }
+
+        printf("Passed test 5: Continues to read and write correctly after one of the disks fails");
+
+
 
 
 
