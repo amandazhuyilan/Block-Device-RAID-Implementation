@@ -436,10 +436,7 @@ int computeParity(struct blkdev *dev, int blockInDisk, int len, void *dataForFai
     int i;
     for (i = 0; i < r4dev->dataDisksCount; i++) {
         if (failedDiskNumber == i) {
-            if (dataForFailedDisk != NULL)
-                memcpy(tempBuf, dataForFailedDisk, len * BLOCK_SIZE);
-            else
-                recoverFailedDiskData(dev, blockInDisk, len, tempBuf);
+            memcpy(tempBuf, dataForFailedDisk, len * BLOCK_SIZE);
         } else {
             struct blkdev *disk = r4dev->disks[i];
             int result = disk->ops->read(disk, blockInDisk, len, tempBuf);
@@ -485,10 +482,6 @@ static int raid4_read(struct blkdev * dev, int first_blk,
         else returnValue = E_UNAVAIL;
 
         if (returnValue == E_UNAVAIL) {
-            // first, close the disk
-            if (diskToUse != NULL)
-                diskToUse->ops->close(diskToUse);
-
             // if the raid4 device is already degraded
             if (r4dev->isDegraded) {
                 // and if the known failed disk is not this disk, return E_UNAVAIL
@@ -498,15 +491,16 @@ static int raid4_read(struct blkdev * dev, int first_blk,
                 // marking the raid4 device as degraded
                 r4dev->isDegraded = 1;
                 r4dev->failedDiskNumber = diskNum;
-
-                // and read into buffer the recovered data for the failed disk
-                recoverFailedDiskData(dev, blockInDisk, len, buf);
             }
+            // and read into buffer the recovered data for the failed disk
+            recoverFailedDiskData(dev, blockInDisk, len, buf);
         } else if (returnValue == SUCCESS) {
-            buf = buf + len * BLOCK_SIZE;
-            i = i - len;
-            first_blk = first_blk + len;
         } else return returnValue;
+
+        // incrementing buffer, iter variable and the block for next iteration
+        buf = buf + len * BLOCK_SIZE;
+        i = i - len;
+        first_blk = first_blk + len;
     }
     return SUCCESS;
 }
@@ -545,6 +539,11 @@ static int raid4_write(struct blkdev * dev, int first_blk,
         struct blkdev *diskToUse = r4dev->disks[diskNum];
         int returnValue;
 
+        // recovered data for failed disk
+        char recoveredDataBuf[len * BLOCK_SIZE];
+        if (r4dev->isDegraded)
+            recoverFailedDiskData(dev, blockInDisk, len, recoveredDataBuf);
+
         if (diskToUse != NULL)
             returnValue = diskToUse->ops->write(diskToUse, blockInDisk, len, buf);
         else returnValue = E_UNAVAIL;
@@ -552,15 +551,26 @@ static int raid4_write(struct blkdev * dev, int first_blk,
         // checking for data disks failures
         // returning E_UNAVAIL if more than 1 disk fails
         if (returnValue == E_UNAVAIL) {
-            // first, closing the disk
-            if (diskToUse != NULL)
-                diskToUse->ops->close(diskToUse);
 
             // if the raid4 device is already degraded
             if (r4dev->isDegraded) {
                 // and if the known failed disk is not this disk, return E_UNAVAIL
                 if (r4dev->failedDiskNumber != diskNum)
                     return E_UNAVAIL;
+                else {
+                    // compute parity with new data, other disk data
+                    char parityBuf[len * BLOCK_SIZE];
+                    returnValue = computeParity(dev, blockInDisk, len, buf, parityBuf);
+
+                    // if a disk fails while computing parity
+                    if (returnValue != -1) return E_UNAVAIL;
+
+                    // write parity
+                    returnValue = parityDisk->ops->write(parityDisk, blockInDisk, len, parityBuf);
+
+                    // if parity disk fails
+                    if (returnValue == E_UNAVAIL) return E_UNAVAIL;
+                }
             } else {
                 // marking the raid4 device as degraded
                 r4dev->isDegraded = 1;
@@ -571,20 +581,20 @@ static int raid4_write(struct blkdev * dev, int first_blk,
                 returnValue = computeParity(dev, blockInDisk, len, buf, parityBuf);
 
                 // if disk failed while computing parity
-                if (returnValue == E_UNAVAIL)
-                    return E_UNAVAIL;
+                if (returnValue == E_UNAVAIL) return E_UNAVAIL;
 
                 // write parity
                 returnValue = parityDisk->ops->write(parityDisk, blockInDisk, len, parityBuf);
 
                 // if parity disk failed
-                if (returnValue == E_UNAVAIL)
-                    return E_UNAVAIL;
+                if (returnValue == E_UNAVAIL) return E_UNAVAIL;
             }
+
         } else if (returnValue == SUCCESS) {
             // compute parity using data disk values
             char parityBuf[len * BLOCK_SIZE];
-            returnValue = computeParity(dev, blockInDisk, len, NULL, parityBuf);
+            // returnValue = computeParity(dev, blockInDisk, len, NULL, parityBuf);
+            returnValue = computeParity(dev, blockInDisk, len, recoveredDataBuf, parityBuf);
 
             // if a disk fails while computing parity
             if (returnValue != -1) {
@@ -603,12 +613,11 @@ static int raid4_write(struct blkdev * dev, int first_blk,
                     r4dev->failedDiskNumber = r4dev->dataDisksCount;
                 }
             }
-
-            // incrementing buffer, iter variable and the block for next iteration
-            buf = buf + len * BLOCK_SIZE;
-            i = i - len;
-            first_blk = first_blk + len;
         }
+        // incrementing buffer, iter variable and the block for next iteration
+        buf = buf + len * BLOCK_SIZE;
+        i = i - len;
+        first_blk = first_blk + len;
     }
     return SUCCESS;
 }
